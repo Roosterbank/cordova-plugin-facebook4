@@ -19,6 +19,7 @@
 @property (strong, nonatomic) FBSDKLoginManager *loginManager;
 @property (strong, nonatomic) NSString* gameRequestDialogCallbackId;
 @property (nonatomic) Boolean isChild;
+@property (nonatomic) Boolean sdkInitialised;
 @property (nonatomic, assign) BOOL applicationWasActivated;
 
 - (NSDictionary *)responseObject;
@@ -41,6 +42,8 @@
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(applicationDidBecomeActive:)
                                                  name:UIApplicationDidBecomeActiveNotification object:nil];
+    [self setUserIsChild:YES];
+    self.sdkInitialised = NO;
 }
 
 - (void) applicationDidFinishLaunching:(NSNotification *) notification {
@@ -49,9 +52,6 @@
         //launchOptions is nil when not start because of notification or url open
         launchOptions = [NSDictionary dictionary];
     }
-    [FBAdSettings setIsChildDirected:true];
-    self.isChild = true;
-
     [[FBSDKApplicationDelegate sharedInstance] application:[UIApplication sharedApplication] didFinishLaunchingWithOptions:launchOptions];
 }
 
@@ -178,7 +178,7 @@
     // without refreshing there will be a cache problem. This simple call should fix the problems
     [FBSDKAccessToken refreshCurrentAccessToken:nil];
 
-    FBSDKLoginManagerRequestTokenHandler loginHandler = ^void(FBSDKLoginManagerLoginResult *result, NSError *error) {
+    FBSDKLoginManagerLoginResultBlock loginHandler = ^void(FBSDKLoginManagerLoginResult *result, NSError *error) {
         if (error) {
             // If the SDK has a message for the user, surface it.
             NSString *errorMessage = error.userInfo[FBSDKErrorLocalizedDescriptionKey] ?: @"There was a problem logging you in.";
@@ -214,7 +214,7 @@
         if (self.loginManager == nil) {
             self.loginManager = [[FBSDKLoginManager alloc] init];
         }
-        [self.loginManager logInWithReadPermissions:permissions fromViewController:[self topMostController] handler:loginHandler];
+        [self.loginManager logInWithPermissions:permissions fromViewController:[self topMostController] handler:loginHandler];
         return;
     }
 
@@ -314,19 +314,7 @@
         content.contentURL = [NSURL URLWithString:[params objectForKey:@"link"]];
 
         self.dialogCallbackId = command.callbackId;
-        
-        FBSDKMessageDialog *messageDialog = [[FBSDKMessageDialog alloc] init];
-        messageDialog.delegate = self;
-        [messageDialog setShareContent:content];
-
-        if ([messageDialog canShow])
-        {
-            [messageDialog show];
-            return;
-        }
-
-        // Messenger isn't installed. Redirect the person to the App Store.
-        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"https://itunes.apple.com/en/app/facebook-messenger/id454638411?mt=8"]];
+        [FBSDKMessageDialog showWithContent:content delegate:self];
         return;
 
     } else if ([method isEqualToString:@"share"] || [method isEqualToString:@"feed"]) {
@@ -372,8 +360,6 @@
             NSLog(@"There was an error parsing your 'object' JSON string");
         } else {
             FBSDKShareOpenGraphObject *object = [FBSDKShareOpenGraphObject objectWithProperties:json];
-            FBSDKShareOpenGraphAction *action = [[FBSDKShareOpenGraphAction alloc] init];
-            action.actionType = params[@"action"];
             if(!json[@"og:type"]) {
                 NSLog(@"No 'og:type' encountered in the object JSON. Please provide an Open Graph object type.");
                 return;
@@ -381,8 +367,8 @@
             NSString *objectType = json[@"og:type"];
             objectType = [objectType stringByReplacingOccurrencesOfString:@"."
                                                                withString:@":"];
+            FBSDKShareOpenGraphAction *action = [FBSDKShareOpenGraphAction actionWithType:params[@"action"] object:object key:objectType];
 
-            [action setObject:object forKey:objectType];
             FBSDKShareOpenGraphContent *content = [[FBSDKShareOpenGraphContent alloc] init];
             content.action = action;
             content.previewPropertyName = objectType;
@@ -398,7 +384,7 @@
         if (![dialog canShow]) {
             CDVPluginResult *pluginResult;
             pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
-                                             messageAsString:@"Cannot show dialog"];
+                            messageAsString:@"Cannot show dialog"];
             return;
         }
 
@@ -478,7 +464,7 @@
     permissions = [requestPermissions copy];
 
     // Defines block that handles the Graph API response
-    FBSDKGraphRequestHandler graphHandler = ^(FBSDKGraphRequestConnection *connection, id result, NSError *error) {
+    FBSDKGraphRequestBlock graphHandler = ^(FBSDKGraphRequestConnection *connection, id result, NSError *error) {
         CDVPluginResult* pluginResult;
         if (error) {
             NSString *message = error.userInfo[FBSDKErrorLocalizedDescriptionKey] ?: @"There was an error making the graph call.";
@@ -494,7 +480,7 @@
     };
 
     NSLog(@"Graph Path = %@", graphPath);
-    FBSDKGraphRequest *request = [[FBSDKGraphRequest alloc] initWithGraphPath:graphPath parameters:nil];
+    FBSDKGraphRequest *request = [[FBSDKGraphRequest alloc] initWithGraphPath:graphPath];
 
     // If we have permissions to request
     if ([permissions count] == 0){
@@ -537,41 +523,6 @@
     }];
 }
 
-- (void) appInvite:(CDVInvokedUrlCommand *) command
-{
-    NSDictionary *options = [command.arguments objectAtIndex:0];
-    NSString *url = options[@"url"];
-    NSString *picture = options[@"picture"];
-    CDVPluginResult *result;
-    self.dialogCallbackId = command.callbackId;
-
-    if (self.isChild) {
-        NSString *errorMessage = @"Feature disabled for a CHILD user.";
-        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
-                                                          messageAsString:errorMessage];
-        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-        return;
-    }
-
-    FBSDKAppInviteContent *content = [[FBSDKAppInviteContent alloc] init];
-
-    if (url) {
-        content.appLinkURL = [NSURL URLWithString:url];
-    }
-    if (picture) {
-        content.appInvitePreviewImageURL = [NSURL URLWithString:picture];
-    }
-
-    FBSDKAppInviteDialog *dialog = [[FBSDKAppInviteDialog alloc] init];
-    if ((url || picture) && [dialog canShow]) {
-        [FBSDKAppInviteDialog showFromViewController:[self topMostController] withContent:content delegate:self];
-    } else {
-        result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
-        [self.commandDelegate sendPluginResult:result callbackId:self.dialogCallbackId];
-    }
-
-}
-
 - (void) getDeferredApplink:(CDVInvokedUrlCommand *) command
 {
 
@@ -610,13 +561,26 @@
 - (void)userIsChild:(CDVInvokedUrlCommand *)command
 {
     NSNumber* isChild = [command argumentAtIndex:0];
-    self.isChild = [isChild boolValue];
-    [FBAdSettings setIsChildDirected:self.isChild];
+    [self setUserIsChild:[isChild boolValue]];
+}
+
+- (void) setUserIsChild:(BOOL)isChild {
+    self.isChild = isChild;
+    [FBAdSettings setMixedAudience:self.isChild];
+    [FBSDKSettings setAutoLogAppEventsEnabled:!self.isChild];
+    [FBSDKSettings setAdvertiserIDCollectionEnabled:!self.isChild];
+    if (!isChild && !self.sdkInitialised) {
+        [FBSDKSettings setAutoInitEnabled: YES ];
+        [FBSDKApplicationDelegate initializeSDK:nil];
+        self.sdkInitialised = YES;
+    } else {
+        [FBSDKSettings setAutoInitEnabled: !self.isChild];
+    }
 }
 
 #pragma mark - Utility methods
 
-- (void) loginWithPermissions:(NSArray *)permissions withHandler:(FBSDKLoginManagerRequestTokenHandler) handler {
+- (void) loginWithPermissions:(NSArray *)permissions withHandler:(FBSDKLoginManagerLoginResultBlock) handler {
     BOOL publishPermissionFound = NO;
     BOOL readPermissionFound = NO;
     if (self.loginManager == nil) {
@@ -639,17 +603,12 @@
     if (publishPermissionFound && readPermissionFound) {
         // Mix of permissions, not allowed
         NSDictionary *userInfo = @{
-                                   FBSDKErrorLocalizedDescriptionKey: @"Cannot ask for both read and publish permissions.",
-                                   };
+            FBSDKErrorLocalizedDescriptionKey: @"Cannot ask for both read and publish permissions.",
+        };
         NSError *error = [NSError errorWithDomain:@"facebook" code:-1 userInfo:userInfo];
         handler(nil, error);
-
-    } else if (publishPermissionFound) {
-        // Only publish permissions
-        [self.loginManager logInWithPublishPermissions:permissions fromViewController:[self topMostController] handler:handler];
     } else {
-        // Only read permissions
-        [self.loginManager logInWithReadPermissions:permissions fromViewController:[self topMostController] handler:handler];
+        [self.loginManager logInWithPermissions:permissions fromViewController:[self topMostController] handler:handler];
     }
 }
 
@@ -815,40 +774,6 @@
 
     CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
                                                       messageAsString:@"User cancelled."];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:self.dialogCallbackId];
-    self.dialogCallbackId = nil;
-}
-
-#pragma mark - FBSDKAppInviteDialogDelegate
-
-// add these methods in if you extend your sharing view controller with <FBSDKAppInviteDialogDelegate>
-- (void)appInviteDialog:(FBSDKAppInviteDialog *)appInviteDialog didCompleteWithResults:(NSDictionary *)results
-{
-    if (!self.dialogCallbackId) {
-        return;
-    }
-
-    NSLog(@"app invite dialog did complete");
-    NSLog(@"result::%@", results);
-
-    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
-                                                  messageAsDictionary:results];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:self.dialogCallbackId];
-    self.dialogCallbackId = nil;
-}
-
-- (void)appInviteDialog:(FBSDKAppInviteDialog *)appInviteDialog didFailWithError:(NSError *)error
-{
-    if (!self.dialogCallbackId) {
-        return;
-    }
-
-    NSLog(@"app invite dialog did fail");
-    NSLog(@"error::%@", error);
-
-    CDVPluginResult *pluginResult;
-    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
-                                     messageAsString:[NSString stringWithFormat:@"Error: %@", error.description]];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:self.dialogCallbackId];
     self.dialogCallbackId = nil;
 }
