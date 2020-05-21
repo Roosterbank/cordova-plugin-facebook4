@@ -83,11 +83,9 @@ public class ConnectPlugin extends CordovaPlugin {
 
     @Override
     protected void pluginInitialize() {
-        FacebookSdk.sdkInitialize(cordova.getActivity().getApplicationContext());
 
         //Set user as a child until we know otherwise.
-        AdSettings.setIsChildDirected(true);
-        isChild = true;
+        setUserIsChild(true);
 
         // create callbackManager
         callbackManager = CallbackManager.Factory.create();
@@ -233,13 +231,13 @@ public class ConnectPlugin extends CordovaPlugin {
     public void onResume(boolean multitasking) {
         super.onResume(multitasking);
         // Developers can observe how frequently users activate their app by logging an app activation event.
-        AppEventsLogger.activateApp(cordova.getActivity());
+        AppEventsLogger.activateApp(cordova.getActivity().getApplication());
     }
 
     @Override
     public void onPause(boolean multitasking) {
         super.onPause(multitasking);
-        AppEventsLogger.deactivateApp(cordova.getActivity());
+        AppEventsLogger.deactivateApp(cordova.getActivity().getApplication());
     }
 
     @Override
@@ -311,7 +309,7 @@ public class ConnectPlugin extends CordovaPlugin {
             cordova.getThreadPool().execute(new Runnable() {
                 @Override
                 public void run() {
-                    AppEventsLogger.activateApp(cordova.getActivity());
+                    AppEventsLogger.activateApp(cordova.getActivity().getApplication());
                 }
             });
 
@@ -324,13 +322,30 @@ public class ConnectPlugin extends CordovaPlugin {
     }
 
     private void executeUserIsChild(JSONArray args, CallbackContext callbackContext) {
-        try {
-            isChild = args.getBoolean(0);
-        } catch (JSONException e) {
-            isChild = false;
-        }
+        cordova.getThreadPool().execute(new Runnable() {
+            public void run() {
+                Boolean value;
+                try {
+                    value = args.getBoolean(0);
+                } catch (JSONException e) {
+                    value = true;
+                }
+                setUserIsChild(value);
+            }
+        });
+    }
 
-        AdSettings.setIsChildDirected(isChild);
+    private void setUserIsChild(Boolean value) {
+        isChild = value;
+        AdSettings.setMixedAudience(isChild);
+        FacebookSdk.setAutoLogAppEventsEnabled(!isChild);
+        FacebookSdk.setAdvertiserIDCollectionEnabled(!isChild);
+        if (!isChild && !FacebookSdk.getAutoInitEnabled()) {
+            FacebookSdk.setAutoInitEnabled(true);
+            FacebookSdk.fullyInitialize();
+        } else {
+            FacebookSdk.setAutoInitEnabled(!isChild);
+        }
     }
 
     private void executeGetDeferredApplink(JSONArray args,
@@ -535,7 +550,7 @@ public class ConnectPlugin extends CordovaPlugin {
 
     private void executeGraph(JSONArray args, CallbackContext callbackContext) throws JSONException {
         lastGraphContext = callbackContext;
-        CallbackContext graphContext  = callbackContext;
+        CallbackContext graphContext = callbackContext;
         PluginResult pr = new PluginResult(PluginResult.Status.NO_RESULT);
         pr.setKeepCallback(true);
         graphContext.sendPluginResult(pr);
@@ -586,7 +601,7 @@ public class ConnectPlugin extends CordovaPlugin {
 
         if (declinedPermission != null) {
             graphContext.error("This request needs declined permission: " + declinedPermission);
-			return;
+            return;
         }
 
         if (publishPermissions && readPermissions) {
@@ -770,7 +785,12 @@ public class ConnectPlugin extends CordovaPlugin {
 
     // Simple active session check
     private boolean hasAccessToken() {
-        return AccessToken.getCurrentAccessToken() != null;
+        AccessToken token = AccessToken.getCurrentAccessToken();
+
+        if (token == null)
+            return false;
+
+        return !token.isExpired();
     }
 
     private void handleError(FacebookException exception, CallbackContext context) {
