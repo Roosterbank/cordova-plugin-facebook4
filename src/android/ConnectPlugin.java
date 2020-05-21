@@ -80,13 +80,14 @@ public class ConnectPlugin extends CordovaPlugin {
     private GameRequestDialog gameRequestDialog;
     private MessageDialog messageDialog;
     private Boolean isChild;
+    private Boolean sdkInitialised;
 
     @Override
     protected void pluginInitialize() {
 
         //Set user as a child until we know otherwise.
         setUserIsChild(true);
-
+        sdkInitialised = false;
         // create callbackManager
         callbackManager = CallbackManager.Factory.create();
 
@@ -340,9 +341,10 @@ public class ConnectPlugin extends CordovaPlugin {
         AdSettings.setMixedAudience(isChild);
         FacebookSdk.setAutoLogAppEventsEnabled(!isChild);
         FacebookSdk.setAdvertiserIDCollectionEnabled(!isChild);
-        if (!isChild && !FacebookSdk.getAutoInitEnabled()) {
+        if (!isChild && !sdkInitialised) {
             FacebookSdk.setAutoInitEnabled(true);
             FacebookSdk.fullyInitialize();
+            sdkInitialised = true;
         } else {
             FacebookSdk.setAutoInitEnabled(!isChild);
         }

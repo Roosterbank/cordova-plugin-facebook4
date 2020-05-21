@@ -19,6 +19,7 @@
 @property (strong, nonatomic) FBSDKLoginManager *loginManager;
 @property (strong, nonatomic) NSString* gameRequestDialogCallbackId;
 @property (nonatomic) Boolean isChild;
+@property (nonatomic) Boolean sdkInitialised;
 @property (nonatomic, assign) BOOL applicationWasActivated;
 
 - (NSDictionary *)responseObject;
@@ -42,6 +43,7 @@
                                              selector:@selector(applicationDidBecomeActive:)
                                                  name:UIApplicationDidBecomeActiveNotification object:nil];
     [self setUserIsChild:YES];
+    self.sdkInitialised = NO;
 }
 
 - (void) applicationDidFinishLaunching:(NSNotification *) notification {
@@ -567,9 +569,10 @@
     [FBAdSettings setMixedAudience:self.isChild];
     [FBSDKSettings setAutoLogAppEventsEnabled:!self.isChild];
     [FBSDKSettings setAdvertiserIDCollectionEnabled:!self.isChild];
-    if (!isChild && !FBSDKSettings.isAutoInitEnabled) {
+    if (!isChild && !self.sdkInitialised) {
         [FBSDKSettings setAutoInitEnabled: YES ];
         [FBSDKApplicationDelegate initializeSDK:nil];
+        self.sdkInitialised = YES;
     } else {
         [FBSDKSettings setAutoInitEnabled: !self.isChild];
     }
