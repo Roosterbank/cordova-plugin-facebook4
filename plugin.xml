@@ -2,7 +2,7 @@
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android"
         id="cordova-plugin-facebook4"
-        version="4.3.0">
+        version="4.4.0">
 
     <name>Facebook Connect</name>
 
@@ -20,8 +20,8 @@
     <preference name="APP_ID" />
     <preference name="APP_NAME" />
     <preference name="FACEBOOK_HYBRID_APP_EVENTS" default="false" />
-    <preference name="FACEBOOK_ANDROID_SDK_VERSION" default="5.15.3"/>
-    <preference name="FACEBOOK_ANDROID_AUDIENCE_NETWORK_SDK_VERSION" default="5.6.1"/>
+    <preference name="FACEBOOK_ANDROID_SDK_VERSION" default="7.1.0"/>
+    <preference name="FACEBOOK_ANDROID_AUDIENCE_NETWORK_SDK_VERSION" default="5.9.0"/>
 
     <engines>
         <!-- Requires > 3.5.0 because of the custom Framework tag for iOS [CB-6698] -->
@@ -182,33 +182,11 @@
                 <source url="https://cdn.cocoapods.org/"/>
             </config>
             <pods use-frameworks="true">
-                <pod name="FBSDKCoreKit" spec="5.15.0" />
-                <pod name="FBSDKLoginKit" spec="5.15.0" />
-                <pod name="FBSDKShareKit" spec="5.15.0" />
-                <pod name="FBAudienceNetwork" spec="5.6.1" />
+                <pod name="FBSDKCoreKit" spec="7.1.0" />
+                <pod name="FBAudienceNetwork" spec="5.9.0" />
             </pods>
         </podspec>
 
-    </platform>
-
-    <!-- browser -->
-    <platform name="browser">
-        <js-module src="www/facebook-browser.js" name="FacebookConnectPluginBrowser">
-            <clobbers target="facebookConnectPlugin" />
-        </js-module>
-        <config-file target="config.xml" parent="/*">
-            <feature name="FacebookConnectPlugin">
-                <param name="browser-package" value="FacebookConnectPluginBrowser"/>
-                <param name="onload" value="true" />
-            </feature>
-            <plugin name="FacebookConnectPlugin" value="FacebookConnectPlugin"/>
-            <access origin="https://m.facebook.com" />
-            <access origin="https://connect.facebook.net" />
-            <access origin="https://graph.facebook.com" />
-            <access origin="https://api.facebook.com" />
-            <access origin="https://*.fbcdn.net" />
-            <access origin="https://*.akamaihd.net" />
-        </config-file>
     </platform>
 
     <!-- after_prepare hook to populate APP_ID -->
