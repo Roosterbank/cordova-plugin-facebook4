@@ -116,7 +116,6 @@
 
 - (void) setUserIsChild:(BOOL)isChild {
     self.isChild = isChild;
-    [FBAdSettings setAdvertiserTrackingEnabled:!self.isChild];
     [FBAdSettings setMixedAudience:self.isChild];
     [FBSDKSettings setAutoLogAppEventsEnabled:!self.isChild];
     [FBSDKSettings setAdvertiserIDCollectionEnabled:!self.isChild];
