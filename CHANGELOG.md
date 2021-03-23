@@ -8,8 +8,14 @@
 ### Kudos
 Thx [Regev Brody](https://github.com/regevbr) for the PR 👍
 
+<a name="4.4.1"></a>
+# [4.4.1](https://github.com/Roosterbank/cordova-plugin-facebook4/releases/tag/4.4.1)
+## Features
+
+Upgraded FBSDK to 8.2, FBAudienceNetwork to 6.2.0 (ios) 6.2.1 (android)
+
 <a name="4.4.0"></a>
-# [4.4.0](https://github.com/Roosterbank/cordova-plugin-facebook4/releases/tag/4.3.0)
+# [4.4.0](https://github.com/Roosterbank/cordova-plugin-facebook4/releases/tag/4.4.0)
 ## Features
 
 Upgraded FBSDK to 7.1, FBAudienceNetwork to 5.9
