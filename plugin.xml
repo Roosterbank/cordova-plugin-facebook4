@@ -21,7 +21,7 @@
     <preference name="APP_NAME" />
     <preference name="FACEBOOK_HYBRID_APP_EVENTS" default="false" />
     <preference name="FACEBOOK_ANDROID_SDK_VERSION" default="8.2.0"/>
-    <preference name="FACEBOOK_ANDROID_AUDIENCE_NETWORK_SDK_VERSION" default="6.2.0"/>
+    <preference name="FACEBOOK_ANDROID_AUDIENCE_NETWORK_SDK_VERSION" default="6.2.1"/>
 
     <engines>
         <!-- Requires > 3.5.0 because of the custom Framework tag for iOS [CB-6698] -->
