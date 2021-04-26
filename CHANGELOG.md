@@ -1,3 +1,39 @@
+<a name="4.5.0"></a>
+# [4.5.0](https://github.com/Roosterbank/cordova-plugin-facebook4/releases/tag/4.5.0)
+
+## Features
+
+Upgraded FBSDK to 9.2.0 (ios), 9.1.1 (android); FBAudienceNetwork to 6.4.1 (ios) 6.4.0 (android)
+
+<a name="4.4.1"></a>
+# [4.4.1](https://github.com/Roosterbank/cordova-plugin-facebook4/releases/tag/4.4.1)
+
+## Features
+
+Upgraded FBSDK to 8.2; FBAudienceNetwork to 6.2.0 (ios) 6.2.1 (android)
+
+<a name="4.4.0"></a>
+# [4.4.0](https://github.com/Roosterbank/cordova-plugin-facebook4/releases/tag/4.4.0)
+
+## Features
+
+Upgraded FBSDK to 7.1; FBAudienceNetwork to 5.9
+Stripped out all commands we don't use
+
+<a name="4.3.0"></a>
+# [4.3.0](https://github.com/Roosterbank/cordova-plugin-facebook4/releases/tag/4.3.0)
+
+## Features
+
+Upgraded FBSDK to 5.15, FBAudienceNetwork to 5.6
+
+<a name="4.2.2"></a>
+# [4.2.2](https://github.com/Roosterbank/cordova-plugin-facebook4/releases/tag/4.2.2)
+
+## Features
+
+Removed FBAudienceNetwork from source
+
 <a name="4.2.1"></a>
 # [4.2.1](https://github.com/jeduan/cordova-plugin-facebook4/releases/tag/v4.2.1)
 
@@ -7,26 +43,6 @@
 
 ### Kudos
 Thx [Regev Brody](https://github.com/regevbr) for the PR 👍
-
-<a name="4.4.1"></a>
-# [4.4.1](https://github.com/Roosterbank/cordova-plugin-facebook4/releases/tag/4.4.1)
-## Features
-
-Upgraded FBSDK to 8.2, FBAudienceNetwork to 6.2.0 (ios) 6.2.1 (android)
-
-<a name="4.4.0"></a>
-# [4.4.0](https://github.com/Roosterbank/cordova-plugin-facebook4/releases/tag/4.4.0)
-## Features
-
-Upgraded FBSDK to 7.1, FBAudienceNetwork to 5.9
-Stripped out all commands we don't use
-
-<a name="4.3.0"></a>
-# [4.3.0](https://github.com/Roosterbank/cordova-plugin-facebook4/releases/tag/4.3.0)
-## Features
-
-Upgraded FBSDK to 5.15, FBAudienceNetwork to 5.6
-
 
 <a name="4.2.0"></a>
 # [4.2.0](https://github.com/jeduan/cordova-plugin-facebook4/releases/tag/v4.2.0)
