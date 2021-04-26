@@ -120,11 +120,10 @@
     [FBSDKSettings setAutoLogAppEventsEnabled:!self.isChild];
     [FBSDKSettings setAdvertiserIDCollectionEnabled:!self.isChild];
     if (!isChild && !self.sdkInitialised) {
-        [FBSDKSettings setAutoInitEnabled: YES ];
-        [FBSDKApplicationDelegate initializeSDK:nil];
+      [[FBSDKApplicationDelegate sharedInstance]
+       application:[UIApplication sharedApplication]
+       didFinishLaunchingWithOptions:nil];
         self.sdkInitialised = YES;
-    } else {
-        [FBSDKSettings setAutoInitEnabled: !self.isChild];
     }
 }
 
