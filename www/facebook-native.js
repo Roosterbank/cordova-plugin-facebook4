@@ -16,3 +16,7 @@ exports.logEvent = function logEvent (name, params, valueToSum, s, f) {
 exports.userIsChild = function (child, s, f) {
   exec(s, f, 'FacebookConnectPlugin', 'userIsChild', [child])
 }
+
+exports.setAdvertiserTracking = function (value, s, f) {
+  exec(s, f, 'FacebookConnectPlugin', 'setAdvertiserTracking', [value])
+}

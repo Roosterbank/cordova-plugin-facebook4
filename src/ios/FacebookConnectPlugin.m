@@ -103,13 +103,11 @@
     }];
 }
 
-- (void) activateApp:(CDVInvokedUrlCommand *)command
-{
+- (void) activateApp:(CDVInvokedUrlCommand *)command {
     [FBSDKAppEvents activateApp];
 }
 
-- (void)userIsChild:(CDVInvokedUrlCommand *)command
-{
+- (void)userIsChild:(CDVInvokedUrlCommand *)command {
     NSNumber* isChild = [command argumentAtIndex:0];
     [self setUserIsChild:[isChild boolValue]];
 }
@@ -125,6 +123,11 @@
        didFinishLaunchingWithOptions:nil];
         self.sdkInitialised = YES;
     }
+}
+
+- (void)setAdvertiserTracking:(CDVInvokedUrlCommand *)command {
+    NSNumber* value = [command argumentAtIndex:0];
+    [FBSDKSettings setAdvertiserTrackingEnabled:[value boolValue]];
 }
 
 #pragma mark - Utility methods

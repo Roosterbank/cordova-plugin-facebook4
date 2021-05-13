@@ -87,6 +87,9 @@ public class ConnectPlugin extends CordovaPlugin {
         } else if (action.equals("userIsChild")) {
             executeUserIsChild(args, callbackContext);
             return true;
+        } else if (action.equals("setAdvertiserTracking")) {
+            // android does not support this function
+            return true;
         }
         return false;
     }

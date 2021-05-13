@@ -19,4 +19,5 @@
 - (void)logEvent:(CDVInvokedUrlCommand *)command;
 - (void)activateApp:(CDVInvokedUrlCommand *)command;
 - (void)userIsChild:(CDVInvokedUrlCommand *)command;
+- (void)setAdvertiserTracking:(CDVInvokedUrlCommand *)command;
 @end
