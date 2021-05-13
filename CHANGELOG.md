@@ -1,3 +1,10 @@
+<a name="4.6.0"></a>
+# [4.6.0](https://github.com/Roosterbank/cordova-plugin-facebook4/releases/tag/4.6.0)
+
+## Features
+
+Added `setAdvertiserTracking` command to plugin for iOS
+
 <a name="4.5.1"></a>
 # [4.5.1](https://github.com/Roosterbank/cordova-plugin-facebook4/releases/tag/4.5.1)
 
