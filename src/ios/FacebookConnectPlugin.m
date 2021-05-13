@@ -126,8 +126,9 @@
 }
 
 - (void)setAdvertiserTracking:(CDVInvokedUrlCommand *)command {
-    NSNumber* value = [command argumentAtIndex:0];
-    [FBSDKSettings setAdvertiserTrackingEnabled:[value boolValue]];
+    BOOL value = [[command argumentAtIndex:0] boolValue];
+    [FBSDKSettings setAdvertiserTrackingEnabled: value];
+    [FBAdSettings setAdvertiserTrackingEnabled: value];
 }
 
 #pragma mark - Utility methods

@@ -1,5 +1,5 @@
-<a name="4.6.0"></a>
-# [4.6.0](https://github.com/Roosterbank/cordova-plugin-facebook4/releases/tag/4.6.0)
+<a name="4.6.1"></a>
+# [4.6.1](https://github.com/Roosterbank/cordova-plugin-facebook4/releases/tag/4.6.0)
 
 ## Features
 
